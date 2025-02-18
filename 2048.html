@@ -1,0 +1,355 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+body {
+    height: 100vh;
+    margin: 0;
+    background-color: #f0f0f0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Lucida Sans', Geneva, Verdana, sans-serif;
+}
+
+.grid {
+    display: grid;
+    grid-template: repeat(4, 100px) / repeat(4, 100px);
+    gap: 5px;
+    background-color: #bbada0;
+    border: 2px solid black;
+    border-radius: 10px;
+    width: 415px;
+    height: 415px;
+}
+
+.cell {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 10px;
+    font-size: 24px;
+    font-weight: bold;
+    color: white;
+    background-color: #cdc1b4;
+    text-align: center;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+@media (max-width: 600px) {
+    .grid {
+        grid-template: repeat(4, 60px) / repeat(4, 60px);
+        width: 250px;
+        height: 250px;
+    }
+
+    .cell {
+        font-size: 18px;
+    }
+
+    #Score, #newGameButton {
+        width: 80px;
+        height: 80px;
+        font-size: 16px;
+    }
+}
+
+.cell[data-value="0"] {
+    background-color: #cdc1b4;
+    color: transparent;
+}
+
+.cell[data-value="2"],
+.cell[data-value="4"] {
+    background-color: #eee4da;
+    color: #776e65;
+}
+
+.cell[data-value="8"] {
+    background-color: #f2b179;
+}
+
+.cell[data-value="16"] {
+    background-color: #f59563;
+}
+
+.cell[data-value="32"] {
+    background-color: #f67c5f;
+}
+
+.cell[data-value="64"] {
+    background-color: #f65e3b;
+}
+
+.cell[data-value="128"] {
+    background-color: #edcf72;
+}
+
+.cell[data-value="256"] {
+    background-color: #edcc61;
+}
+
+.cell[data-value="512"] {
+    background-color: #edc850;
+}
+
+.cell[data-value="1024"] {
+    background-color: #edc53f;
+}
+
+.cell[data-value="2048"] {
+    background-color: #edc22e;
+}
+
+#Score {
+    margin-bottom: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100px;
+    height: 100px;
+    border: 2px solid black;
+    border-radius: 5px;
+    background-color: #eee;
+    text-align: center;
+}
+
+#Score p {
+    margin: 0;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+#newGameButton {
+    margin-top: 20px;
+    padding: 10px 20px;
+    font-size: 18px;
+    font-weight: bold;
+    background-color: #f67c5f;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+#newGameButton:hover {
+    background-color: #f65e3b;
+}
+
+    </style>
+</head>
+<body>
+    <div id="Score">
+        <p>Score:</p>
+        <p id="ScoreNumber">0</p>
+    </div>
+    <div class="grid"></div>
+    <button id="newGameButton" style="display: none;">New Game</button>
+    <script>
+        const grid = document.querySelector('.grid');
+        const size = 4;
+        let board = Array(size).fill().map(() => Array(size).fill(0));
+        let score = 0;
+
+        // Создаем пустую сетку
+        function createGrid() {
+            grid.innerHTML = '';
+            for (let row = 0; row < size; row++) {
+                for (let col = 0; col < size; col++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    cell.dataset.row = row;
+                    cell.dataset.col = col;
+                    cell.dataset.value = board[row][col];
+                    cell.textContent = board[row][col] === 0 ? '' : board[row][col];
+                    grid.appendChild(cell);
+                }
+            }
+            document.getElementById('ScoreNumber').textContent = score; // Обновляем счет
+        }
+
+        // Добавляем новую плитку
+        function addNewTile() {
+        const emptyCells = [];
+        for (let row = 0; row < size; row++) {
+            for (let col = 0; col < size; col++) {
+                if (board[row][col] === 0) emptyCells.push({ row, col });
+            }
+        }
+        if (emptyCells.length === 0) return;
+
+        const { row, col } = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+
+        const possibleTiles = [2, 4, Math.max(2, Math.max(...board.flat()) / 2)];
+        const cumulativeProbabilities = [0.7, 0.95, 1.0]; // Накопленные вероятности
+        const random = Math.random();
+
+        let newTile;
+        for (let i = 0; i < cumulativeProbabilities.length; i++) {
+            if (random < cumulativeProbabilities[i]) {
+                newTile = possibleTiles[i];
+                break;
+            }
+        }
+
+        board[row][col] = newTile;
+        createGrid();
+        }
+   
+        // Движение плиток
+        function slide(row) {
+            const filteredRow = row.filter(val => val !== 0);
+            const empty = Array(size - filteredRow.length).fill(0);
+            return [...filteredRow, ...empty];
+        }
+
+        function combine(row) {
+            for (let i = 0; i < row.length - 1; i++) {
+                if (row[i] !== 0 && row[i] === row[i + 1]) {
+                    row[i] *= 2; // Удваиваем значение
+                    score += row[i]; // Добавляем очки
+                    row[i + 1] = 0; // Удаляем объединенную плитку
+                }
+            }
+            return row;
+        }
+
+        function moveLeft() {
+        let moved = false; // Флаг для проверки, произошло ли движение
+        for (let row = 0; row < size; row++) {
+            const originalRow = [...board[row]]; // Сохраняем оригинальную строку для сравнения
+            board[row] = slide(combine(slide(board[row])));
+            if (JSON.stringify(originalRow) !== JSON.stringify(board[row])) {
+                moved = true; // Движение произошло
+            }
+        }
+        return moved; // Возвращаем true, если что-то изменилось
+        }   
+
+        function moveRight() {
+        let moved = false; // Флаг для отслеживания изменений
+        for (let row = 0; row < size; row++) {
+            const originalRow = [...board[row]]; // Сохраняем оригинальную строку для сравнения
+            board[row] = slide(combine(slide(board[row].reverse()))).reverse(); // Движение вправо
+            if (JSON.stringify(originalRow) !== JSON.stringify(board[row])) {
+                moved = true; // Если строка изменилась, устанавливаем флаг
+            }
+        }
+        return moved; // Возвращаем true, если было движение
+        }
+
+        function moveUp() {
+            let moved = false; // Флаг для отслеживания изменений
+            for (let col = 0; col < size; col++) {
+                let column = board.map(row => row[col]); // Извлекаем колонку
+                const originalColumn = [...column]; // Сохраняем оригинальную колонку для сравнения
+                column = slide(combine(slide(column))); // Движение вверх
+                for (let row = 0; row < size; row++) {
+                    board[row][col] = column[row]; // Обновляем доску
+                }
+                if (JSON.stringify(originalColumn) !== JSON.stringify(column)) {
+                    moved = true; // Если колонка изменилась, устанавливаем флаг
+                }
+            }
+            return moved; // Возвращаем true, если было движение
+        }
+
+        function moveDown() {
+            let moved = false; // Флаг для отслеживания изменений
+            for (let col = 0; col < size; col++) {
+                let column = board.map(row => row[col]); // Извлекаем колонку
+                const originalColumn = [...column]; // Сохраняем оригинальную колонку для сравнения
+                column = slide(combine(slide(column.reverse()))).reverse(); // Движение вниз
+                for (let row = 0; row < size; row++) {
+                    board[row][col] = column[row]; // Обновляем доску
+                }
+                if (JSON.stringify(originalColumn) !== JSON.stringify(column)) {
+                    moved = true; // Если колонка изменилась, устанавливаем флаг
+                }
+            }
+            return moved; // Возвращаем true, если было движение
+        }
+
+       
+        let gameOver = false;
+
+        function checkGameOver() {
+            // Проверяем пустые ячейки и возможные ходы
+            for (let row = 0; row < size; row++) {
+                for (let col = 0; col < size; col++) {
+                    if (board[row][col] === 0) return false;
+                    if (col < size - 1 && board[row][col] === board[row][col + 1]) return false;
+                    if (row < size - 1 && board[row][col] === board[row + 1][col]) return false;
+                }
+            }
+
+            // Если игра окончена
+            document.getElementById('newGameButton').style.display = 'block';
+            gameOver = true;
+            return true;
+        }
+
+        document.getElementById('newGameButton').addEventListener('click', () => {
+            document.getElementById('newGameButton').style.display = 'none';
+            gameOver = false;
+            resetGame();
+        });
+
+        // Обработчик для кнопки "Новая игра"
+        document.getElementById('newGameButton').addEventListener('click', () => {
+            document.getElementById('newGameButton').style.display = 'none'; // Скрываем кнопку
+            resetGame(); // Сбрасываем игру
+        });
+
+        function resetGame() {
+            // Очищаем поле и обнуляем счет
+            board = Array(size).fill().map(() => Array(size).fill(0));
+            score = 0;
+            addNewTile();
+            addNewTile();
+            createGrid();
+        }
+
+        window.addEventListener('keydown', (event) => {
+    if (gameOver) return; // Блокируем движение, если игра завершена
+
+    let moved = false;
+
+    switch (event.key) {
+        case 'ArrowUp':
+            moved = moveUp();
+            break;
+        case 'ArrowDown':
+            moved = moveDown();
+            break;
+        case 'ArrowLeft':
+            moved = moveLeft();
+            break;
+        case 'ArrowRight':
+            moved = moveRight();
+            break;
+        default:
+            return; // Игнорируем другие клавиши
+    }
+
+    if (moved) {
+        addNewTile(); // Добавляем новую плитку, если движение произошло
+        createGrid(); // Обновляем отображение
+    }
+
+    if (checkGameOver()) {
+        setTimeout(() => alert(`Game over! Your score is ${score}.`), 100);
+    }
+});
+
+
+        addNewTile();
+        addNewTile();
+        createGrid();
+    </script>
+</body>
+</html>
+
