@@ -1,0 +1,136 @@
+body {
+    height: 100vh;
+    margin: 0;
+    background-color: #f0f0f0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Lucida Sans', Geneva, Verdana, sans-serif;
+}
+
+.grid {
+    display: grid;
+    grid-template: repeat(4, 100px) / repeat(4, 100px);
+    gap: 5px;
+    background-color: #bbada0;
+    border: 2px solid black;
+    border-radius: 10px;
+    width: 415px;
+    height: 415px;
+}
+
+.cell {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 10px;
+    font-size: 24px;
+    font-weight: bold;
+    color: white;
+    background-color: #cdc1b4;
+    text-align: center;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+@media (max-width: 600px) {
+    .grid {
+        grid-template: repeat(4, 60px) / repeat(4, 60px);
+        width: 250px;
+        height: 250px;
+    }
+
+    .cell {
+        font-size: 18px;
+    }
+
+    #Score, #newGameButton {
+        width: 80px;
+        height: 80px;
+        font-size: 16px;
+    }
+}
+
+.cell[data-value="0"] {
+    background-color: #cdc1b4;
+    color: transparent;
+}
+
+.cell[data-value="2"],
+.cell[data-value="4"] {
+    background-color: #eee4da;
+    color: #776e65;
+}
+
+.cell[data-value="8"] {
+    background-color: #f2b179;
+}
+
+.cell[data-value="16"] {
+    background-color: #f59563;
+}
+
+.cell[data-value="32"] {
+    background-color: #f67c5f;
+}
+
+.cell[data-value="64"] {
+    background-color: #f65e3b;
+}
+
+.cell[data-value="128"] {
+    background-color: #edcf72;
+}
+
+.cell[data-value="256"] {
+    background-color: #edcc61;
+}
+
+.cell[data-value="512"] {
+    background-color: #edc850;
+}
+
+.cell[data-value="1024"] {
+    background-color: #edc53f;
+}
+
+.cell[data-value="2048"] {
+    background-color: #edc22e;
+}
+
+#Score {
+    margin-bottom: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100px;
+    height: 100px;
+    border: 2px solid black;
+    border-radius: 5px;
+    background-color: #eee;
+    text-align: center;
+}
+
+#Score p {
+    margin: 0;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+#newGameButton {
+    margin-top: 20px;
+    padding: 10px 20px;
+    font-size: 18px;
+    font-weight: bold;
+    background-color: #f67c5f;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+#newGameButton:hover {
+    background-color: #f65e3b;
+}
